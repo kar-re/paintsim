@@ -28,7 +28,7 @@
 	</head>
 	<body>
 		<div id="container"></div>
-		<div id="info"><a href="http://threejs.org/" target="_blank" rel="noopener">DSek Kiosken simulator</a> <br>Vänsterklick för att måla | Högerklick för att rotera</div>
+		<div id="info"><a href="https://github.com/kar-re/paintsim" target="_blank" rel="noopener">DSek Kiosken simulator</a> <p id="sek"></p> <br>Vänsterklick för att måla | Högerklick för att rotera</div>
 		<script src="content/three.js"></script>
 		<script src="content/OBJLoader.js"></script>
 		<script src="content/OrbitControls.js"></script>
@@ -39,7 +39,7 @@
 
 			var container, controls;
 			var renderer, camera, scene;
-			var meshPainter;
+			var painter;
 
 			function init() {
 
@@ -61,16 +61,16 @@
 				
 
 				controls = new THREE.OrbitControls( camera );
-				controls.enableZoom = false;
+				controls.enableZoom = true;
 				controls.enablePan = false;
 				controls.mouseButtons.LEFT = THREE.MOUSE.RIGHT;
 				controls.mouseButtons.RIGHT = THREE.MOUSE.LEFT;
 				controls.update();
 
-				const ambientLight = new THREE.AmbientLight( 0xcccccc, 0.3 );
+				const ambientLight = new THREE.AmbientLight( 0xcccccc, 0.44 );
 				scene.add( ambientLight );
 
-				const pointLight = new THREE.PointLight( 0xffffff, 1 );
+				const pointLight = new THREE.PointLight( 0xffffff, .65 );
 				
 				camera.add( pointLight );
 				scene.add( camera );
@@ -78,7 +78,56 @@
 				// Plane model.
 				var planeTexture = new THREE.Texture( undefined, THREE.UVMapping, THREE.MirroredRepeatWrapping, THREE.MirroredRepeatWrapping );
 				planeTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-				var planeMaterial = new THREE.MeshStandardMaterial( { map: planeTexture } );
+
+				
+				var planeMaterial = new THREE.MeshStandardMaterial( { map: planeTexture, roughness: 0.86, metalness: 0.0  } );	
+				// instantiate a loader
+				const loaderTex = new THREE.TextureLoader();
+				// var AOtex = new THREE.Texture( undefined, THREE.UVMapping, THREE.MirroredRepeatWrapping, THREE.MirroredRepeatWrapping );
+				
+				// load a resource
+				loaderTex.load(
+					// resource URL
+					'content/ao.jpg',
+
+					// onLoad callback
+					function ( texture ) {
+						// in this example we create the material when the texture is loaded
+						planeMaterial.roughnessMap = texture;
+					},
+
+					// onProgress callback currently not supported
+					undefined,
+
+					// onError callback
+					function ( err ) {
+						console.error( 'An error happened.' );
+					}
+				);
+				const loaderTexB = new THREE.TextureLoader();
+				// var AOtex = new THREE.Texture( undefined, THREE.UVMapping, THREE.MirroredRepeatWrapping, THREE.MirroredRepeatWrapping );
+				
+				// load a resource
+				loaderTexB.load(
+					// resource URL
+					'content/normal.jpg',
+
+					// onLoad callback
+					function ( texture ) {
+						// in this example we create the material when the texture is loaded
+						planeMaterial.normalMap = texture;
+					},
+
+					// onProgress callback currently not supported
+					undefined,
+
+					// onError callback
+					function ( err ) {
+						console.error( 'An error happened.' );
+					}
+				);
+				
+				
 				
 
 				var planeGeometry = new THREE.TorusGeometry( 20, 7, 32, 128 );
@@ -88,9 +137,9 @@
 				 //mesh.updateMatrix();
 				// scene.add( mesh );
 				// scene.add( planeGeometry );
-				painter = new THREE.TexturePainter( renderer, camera, mesh);
+				 painter = new THREE.TexturePainter( renderer, camera, mesh);
 				const loader = new THREE.OBJLoader();
-				// var mesh;
+				
 				// load a resource
 				loader.load(
 					// resource URL
@@ -100,7 +149,7 @@
 						var mesha;
 						object.traverse( function( child ) {
 						if ( child instanceof THREE.Mesh ) {
-							console.log("Hej!");
+							// console.log("Hej!");
 							child.material = planeMaterial;
 							mesha = child;
 							var geometry = new THREE.Geometry().fromBufferGeometry( child.geometry );
@@ -111,13 +160,11 @@
 						}
 					} );
 					
-						console.log(mesha.geometry.attributes);
-						// console.log(mesha.geometry.getAttribute("uv"));
 						
 						scene.add( mesha );
 						mesha.updateMatrix();
-						//painter = null;
-						painter = new THREE.TexturePainter( renderer, camera, mesha );
+
+						painter.mesh = mesha;
 						
 						
 
@@ -125,7 +172,7 @@
 					// called when loading is in progresses
 					function ( xhr ) {
 
-						console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+						// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
 
 					},
 					// called when loading has errors

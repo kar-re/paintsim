@@ -76,6 +76,28 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 	var cursorUnits = cursorSize / frustumSize / aspect;
 	var cameraPosition = scope.camera.position.clone();
 
+	
+
+	var sekColors = [
+		"#ffffff",
+		"#ff9400",
+		"#eaff00",
+		"#71002e",
+		"#00ffff",
+		"#ff0000",
+		"#008000"
+		];
+	var sektion = [
+		"elektro",
+		"F-arna",
+		"kemisterna",
+		"indekarna",
+		"wekosarna",
+		"maskinarna",
+		"lantmästeristerna"
+		];
+	var currInd = Math.floor(Math.random() * sekColors.length);
+
 	var initialize = function( src ) {
 
 		// canvas initialization
@@ -96,9 +118,18 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 
 			scope.canvas.width = scope.bg.naturalWidth;
 			scope.canvas.height = scope.bg.naturalHeight;
+			
 
+			
+			document.getElementById("sek").innerHTML = "Åh nej! Nu har " + sektion[currInd] + " varit här igen. Vi måste måla över det!";
+			scope.ctx.fillStyle = sekColors[currInd];
+			// scope.ctx.fill();
+			scope.ctx.globalCompositeOperation = 'multiply';
+			scope.ctx.fillRect(0, 0, scope.bg.naturalWidth, scope.bg.naturalHeight);
+			// console.log("Filled with: " + sekColors[currInd] );
 			scope.ctx.drawImage( scope.bg, 0, 0 );
 			scope.texture.needsUpdate = true;
+			scope.ctx.globalCompositeOperation = 'source-over';
 
 		}, false );
 
