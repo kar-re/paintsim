@@ -99,7 +99,7 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 	var currInd = Math.floor(Math.random() * sekColors.length);
 
 	var initialize = function( src ) {
-
+		document.getElementById("sek").innerHTML = "Åh nej! Nu har " + sektion[currInd] + " varit här igen. Vi måste måla över det!";
 		// canvas initialization
 		scope.canvas = document.createElement( "canvas" );
 		scope.canvas.width = scope.canvas.height = 4096;
@@ -121,7 +121,7 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 			
 
 			
-			document.getElementById("sek").innerHTML = "Åh nej! Nu har " + sektion[currInd] + " varit här igen. Vi måste måla över det!";
+			
 			scope.ctx.fillStyle = sekColors[currInd];
 			// scope.ctx.fill();
 			scope.ctx.globalCompositeOperation = 'multiply';
