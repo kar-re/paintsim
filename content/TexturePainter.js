@@ -94,7 +94,7 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 		"indekarna",
 		"wekosarna",
 		"maskinarna",
-		"lantmästeristerna"
+		"lantmätarna"
 		];
 	var currInd = Math.floor(Math.random() * sekColors.length);
 
@@ -105,6 +105,8 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 		scope.canvas.width = scope.canvas.height = 4096;
 
 		scope.ctx = scope.canvas.getContext( "2d" );
+
+	
 
 		scope.texture = scope.mesh.material.map || new THREE.Texture( undefined, THREE.UVMapping );
 		scope.texture.image = scope.canvas;
@@ -119,15 +121,15 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 			scope.canvas.width = scope.bg.naturalWidth;
 			scope.canvas.height = scope.bg.naturalHeight;
 			
-
-			
 			
 			scope.ctx.fillStyle = sekColors[currInd];
-			// scope.ctx.fill();
+
 			scope.ctx.globalCompositeOperation = 'multiply';
 			scope.ctx.fillRect(0, 0, scope.bg.naturalWidth, scope.bg.naturalHeight);
-			// console.log("Filled with: " + sekColors[currInd] );
+		
 			scope.ctx.drawImage( scope.bg, 0, 0 );
+
+
 			scope.texture.needsUpdate = true;
 			scope.ctx.globalCompositeOperation = 'source-over';
 
@@ -138,29 +140,29 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 
 		// cursor initialization
 		scope.scene = new THREE.Scene();
-		scope.scene.background = null;
+		// scope.scene.background = null;
 
 		scope.ortho = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 0, 10 );
 		scope.ortho.position.z = 50;
 		scope.ortho.lookAt( scope.scene.position );
-
 		var cursorTexture = new THREE.Texture( undefined, THREE.UVMapping, THREE.MirroredRepeatWrapping, THREE.MirroredRepeatWrapping );
 		var cursorMaterial = new THREE.MeshBasicMaterial( { map: cursorTexture, transparent: true } );
 		var cursorGeometry = new THREE.PlaneBufferGeometry( cursorSize, cursorSize, 1, 1 );
-
+		
 		scope.cursor = new THREE.Mesh( cursorGeometry, cursorMaterial );
 		scope.cursor.position.copy( scope.ortho.position );
 		scope.cursor.rotation.copy( scope.ortho.rotation );
 		scope.scene.add( scope.cursor );
-
+		
 		var canvasCursor = document.createElement( "canvas" );
 		canvasCursor.width = canvasCursor.height = 128;
 		var context = canvasCursor.getContext( "2d" );
-
+		
 		cursorTexture.image = canvasCursor;
+		
 
 		context.lineWidth = 8;
-		context.strokeStyle = "rgba(0, 0, 0, 0.7)";
+		context.strokeStyle = "rgba(0, 0, 0, 1.0)";
 
 		context.clearRect( 0, 0, canvasCursor.width, canvasCursor.height );
 
@@ -204,20 +206,21 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 		var height = scope.canvas.height;
 		var length = vectors.length / 2;
 
-		scope.ctx.fillStyle = "rgba( 242, 128, 161, 1 )";
+		scope.ctx.fillStyle = "rgba( 242, 128, 161, 1.0 )";
 
 		// move to the first point
 		scope.ctx.beginPath();
 		scope.ctx.moveTo( vectors[length-1].x * width, vectors[length-1].y * height );
-
+		scope.dingdong = document.createElement( "img" );
+		scope.dingdong.src = "content/hand.png";
+		scope.ctx.drawImage(scope.dingdong, 0, 0);
 		for (i = 0; i < length; i ++) {
-
-		  scope.ctx.quadraticCurveTo(
-				vectors[ length + i ].x * width, // cp1.x
-				vectors[ length + i ].y * height, // cp1.y
-				vectors[ i ].x * width, // p2.x
-				vectors[ i ].y * height // p2.y
-			);
+		//   scope.ctx.quadraticCurveTo(
+		// 		vectors[ length + i ].x * width, // cp1.x
+		// 		vectors[ length + i ].y * height, // cp1.y
+		// 		vectors[ i ].x * width, // p2.x
+		// 		vectors[ i ].y * height // p2.y
+		// 	);
 
 		}
 		scope.ctx.fill();
@@ -326,7 +329,7 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 		var uvs = scope.mesh.geometry.faceVertexUvs[0];
 
 		// set clip-space.
-		var min = new THREE.Vector3( - cursorUnits, - cursorUnits*aspect, - 0.1 );
+		var min = new THREE.Vector3( - cursorUnits, - cursorUnits*aspect, - 0.01 );
 		var max = new THREE.Vector3( + cursorUnits, + cursorUnits*aspect, + scope.camera.far );
 		var clip = new THREE.Box3( min, max );
 

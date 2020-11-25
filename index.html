@@ -32,6 +32,10 @@
 		<script src="content/three.js"></script>
 		<script src="content/OBJLoader.js"></script>
 		<script src="content/OrbitControls.js"></script>
+		<script src="https://unpkg.com/three@0.105.0/examples/js/loaders/RGBELoader.js"></script>
+		<script src="https://unpkg.com/three@0.105.0/examples/js/pmrem/PMREMGenerator.js"></script>
+		<script src="https://unpkg.com/three@0.105.0/examples/js/pmrem/PMREMCubeUVPacker.js"></script>
+		<script src="https://unpkg.com/three@0.105.0/examples/js/loaders/EquirectangularToCubeGenerator.js"></script>
 		<script src="content/TexturePainter.js"></script>
 		<script>
 			var width = window.innerWidth;
@@ -48,6 +52,9 @@
 				renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( width, height );
+				renderer.toneMapping = THREE.ACESFilmicToneMapping;
+				renderer.toneMappingExposure = 1.1;
+				renderer.outputEncoding = THREE.sRGBEncoding;
 				container.appendChild( renderer.domElement );
 
 				
@@ -60,6 +67,9 @@
 				
 				
 
+
+						
+
 				controls = new THREE.OrbitControls( camera );
 				controls.enableZoom = true;
 				controls.enablePan = false;
@@ -67,23 +77,23 @@
 				controls.mouseButtons.RIGHT = THREE.MOUSE.LEFT;
 				controls.update();
 
-				const ambientLight = new THREE.AmbientLight( 0xcccccc, 0.44 );
-				scene.add( ambientLight );
+				// const ambientLight = new THREE.AmbientLight( 0xffffff, 0.44 );
+				// scene.add( ambientLight );
 
-				const pointLight = new THREE.PointLight( 0xffffff, .65 );
+				//  const pointLight = new THREE.PointLight( 0xffffff, -0.62 );
 				
-				camera.add( pointLight );
-				scene.add( camera );
+				//  camera.add( pointLight );
+				//  scene.add( camera );
 
 				// Plane model.
 				var planeTexture = new THREE.Texture( undefined, THREE.UVMapping, THREE.MirroredRepeatWrapping, THREE.MirroredRepeatWrapping );
 				planeTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-				
-				var planeMaterial = new THREE.MeshStandardMaterial( { map: planeTexture, roughness: 0.86, metalness: 0.0  } );	
+				// MeshPhysicalMaterial
+				var planeMaterial = new THREE.MeshPhysicalMaterial( { map: planeTexture, roughness: 0.85, metalness: 0.01, normalScale : new THREE.Vector2( 0.4, 0.4 ) } );	
+				console.log();
 				// instantiate a loader
 				const loaderTex = new THREE.TextureLoader();
-				// var AOtex = new THREE.Texture( undefined, THREE.UVMapping, THREE.MirroredRepeatWrapping, THREE.MirroredRepeatWrapping );
 				
 				// load a resource
 				loaderTex.load(
@@ -105,9 +115,6 @@
 					}
 				);
 				const loaderTexB = new THREE.TextureLoader();
-				// var AOtex = new THREE.Texture( undefined, THREE.UVMapping, THREE.MirroredRepeatWrapping, THREE.MirroredRepeatWrapping );
-				
-				// load a resource
 				loaderTexB.load(
 					// resource URL
 					'content/normal.jpg',
@@ -126,10 +133,8 @@
 						console.error( 'An error happened.' );
 					}
 				);
-				
-				
-				
 
+				
 				var planeGeometry = new THREE.TorusGeometry( 20, 7, 32, 128 );
 
 				 var mesh = new THREE.Mesh( planeGeometry, planeMaterial );
@@ -140,7 +145,34 @@
 				 painter = new THREE.TexturePainter( renderer, camera, mesh);
 				const loader = new THREE.OBJLoader();
 				
-				// load a resource
+			
+				var envLoader = new THREE.RGBELoader().setPath( 'content/' ).setType( THREE.UnsignedByteType )
+				.load( 'venice_sunset_2k.hdr', function ( texture ) {
+
+					texture.encoding = THREE.RGBEEncoding;
+					texture.minFilter = THREE.LinearFilter;
+					texture.magFilter = THREE.LinearFilter;
+					texture.generateMipmaps = true;
+					texture.flipY = true;
+					texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+					var cubeGenerator = new THREE.EquirectangularToCubeGenerator( texture, { resolution: 1024 } );
+					cubeGenerator.update( renderer );
+
+					var background = cubeGenerator.renderTarget;
+
+					var pmremGenerator = new THREE.PMREMGenerator( cubeGenerator.renderTarget.texture );
+					pmremGenerator.update( renderer );
+
+					var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker( pmremGenerator.cubeLods );
+					pmremCubeUVPacker.update( renderer );
+
+					envmap = pmremCubeUVPacker.CubeUVRenderTarget.texture;
+					scene.background = background;
+					scene.environment = envmap;
+					planeMaterial.envMap = envmap;
+
+						// load a resource
 				loader.load(
 					// resource URL
 					'content/kiosk.obj',
@@ -151,6 +183,10 @@
 						if ( child instanceof THREE.Mesh ) {
 							// console.log("Hej!");
 							child.material = planeMaterial;
+							child.material.envMap = envmap;
+							// const texture = new THREE.TextureLoader().load(child.materal.map.image);
+							// var roughness = child.material.map.a;
+							console.log(child.material.map);
 							mesha = child;
 							var geometry = new THREE.Geometry().fromBufferGeometry( child.geometry );
 							geometry.computeFaceNormals();
@@ -182,6 +218,18 @@
 
 					}
 				);
+
+
+					texture.dispose();
+					pmremGenerator.dispose();
+					pmremCubeUVPacker.dispose();
+					
+						render();
+					} );
+				
+				
+				
+
 
 				
 
