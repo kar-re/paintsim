@@ -28,7 +28,7 @@
 	</head>
 	<body>
 		<div id="container"></div>
-		<div id="info"><a href="https://github.com/kar-re/paintsim" target="_blank" rel="noopener">DSek Kiosken simulator</a> <p id="sek"></p> <br>Vänsterklick för att måla | Högerklick för att rotera</div>
+		<div id="info"><a href="https://github.com/kar-re/paintsim" target="_blank" rel="noopener">DSek Kiosken simulator</a> <p id="sek"></p><p id="sek1"></p> <br>Vänsterklick för att måla | Högerklick för att rotera</div>
 		<script src="content/three.js"></script>
 		<script src="content/OBJLoader.js"></script>
 		<script src="content/OrbitControls.js"></script>
@@ -61,7 +61,7 @@
 				
 
 				controls = new THREE.OrbitControls( camera );
-				controls.enableZoom = true;
+				controls.enableZoom = false;
 				controls.enablePan = false;
 				controls.mouseButtons.LEFT = THREE.MOUSE.RIGHT;
 				controls.mouseButtons.RIGHT = THREE.MOUSE.LEFT;

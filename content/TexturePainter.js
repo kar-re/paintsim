@@ -40,6 +40,11 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 
 		scope.renderer.autoClear = false;
 		scope.renderer.render( scope.scene, scope.ortho );
+		document.getElementById("sek1").innerHTML = percent/10000 + "%";
+		if (percent/10000 > 95 && !popupOpen) {
+			alert("Nyckel: BRAJOBBAT");
+			popupOpen = true;
+		}
 
 	};
 
@@ -65,6 +70,7 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 	//
 
 	var scope = this;
+	var popupOpen = false;
 
 	var verticesDict;
 
@@ -75,7 +81,9 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 	var aspect = window.innerWidth / window.innerHeight;
 	var cursorUnits = cursorSize / frustumSize / aspect;
 	var cameraPosition = scope.camera.position.clone();
-
+	var percent = 0;
+	var countdown;
+	var state;
 	
 
 	var sekColors = [
@@ -99,7 +107,8 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 	var currInd = Math.floor(Math.random() * sekColors.length);
 
 	var initialize = function( src ) {
-		document.getElementById("sek").innerHTML = "Åh nej! Nu har " + sektion[currInd] + " varit här igen. Vi måste måla över det!";
+		document.getElementById("sek").innerHTML = "Åh nej! Nu har " + sektion[currInd] + " varit här igen. Vi måste måla över det! Nuvarande";
+		document.getElementById("sek1").innerHTML = "Tid kvar:" + countdown + "s, " + percent + "%";
 		// canvas initialization
 		scope.canvas = document.createElement( "canvas" );
 		scope.canvas.width = scope.canvas.height = 4096;
@@ -204,22 +213,21 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 		var height = scope.canvas.height;
 		var length = vectors.length / 2;
 
-		scope.ctx.fillStyle = "rgba( 242, 128, 161, 1 )";
+		scope.ctx.fillStyle = "rgba( 242, 128, 161, 1.0 )";
+		
 
 		// move to the first point
 		scope.ctx.beginPath();
 		scope.ctx.moveTo( vectors[length-1].x * width, vectors[length-1].y * height );
-
 		for (i = 0; i < length; i ++) {
-
 		  scope.ctx.quadraticCurveTo(
 				vectors[ length + i ].x * width, // cp1.x
 				vectors[ length + i ].y * height, // cp1.y
 				vectors[ i ].x * width, // p2.x
 				vectors[ i ].y * height // p2.y
-			);
-
-		}
+				);
+				percent += 1;
+			}
 		scope.ctx.fill();
 
 	};
@@ -234,11 +242,12 @@ THREE.TexturePainter = function ( renderer, camera, mesh, src ) {
 
 			faceClip( face.clip );
 			faceDraw( face.vectors ); // face.points
+			
 
 			scope.ctx.restore();
 
 		});
-
+		
 		scope.texture.needsUpdate = true;
 
 	};
